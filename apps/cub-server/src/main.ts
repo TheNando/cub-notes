@@ -1,28 +1,40 @@
-import { initTRPC } from "@trpc/server";
+import { appRouter } from "@cub/api";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { createContext } from "./context.ts";
 
-const t = initTRPC.create();
+function resolvePort() {
+  const value = Bun.env.PORT;
 
-const appRouter = t.router({
-  greeting: t.procedure.query(() => "Hello from Bun and tRPC!"),
-});
+  if (value === undefined) {
+    return 3000;
+  }
 
-export type AppRouter = typeof appRouter;
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 0 || port > 65_535) {
+    throw new Error("PORT must be an integer between 0 and 65535");
+  }
 
-Bun.serve({
-  port: 3000,
+  return port;
+}
+
+const server = Bun.serve({
+  port: resolvePort(),
   fetch(req) {
     const url = new URL(req.url);
-    if (url.pathname.startsWith("/trpc")) {
+    if (url.pathname === "/trpc" || url.pathname.startsWith("/trpc/")) {
       return fetchRequestHandler({
         endpoint: "/trpc",
         req,
         router: appRouter,
-        createContext: () => ({}),
+        createContext,
       });
     }
     return new Response("Not found", { status: 404 });
   },
+  error(error) {
+    console.error(error);
+    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+  },
 });
 
-console.log("Server running at http://localhost:3000");
+console.log(`Server running at ${server.url}`);

@@ -1,0 +1,22 @@
+{
+  "name": "@cub/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc",
+    "build": "tsc",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.18.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
