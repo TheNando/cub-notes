@@ -1,60 +1,121 @@
 import "./style.css";
-import typescriptLogo from "./assets/typescript.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
-import { setupCounter } from "./counter.ts";
+import type { Note } from "@cub/api";
+import { trpc } from "./trpc.ts";
 
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+const app = document.querySelector<HTMLDivElement>("#app");
+if (app === null) {
+  throw new Error("App root not found");
+}
 
-<div class="ticks"></div>
+app.innerHTML = `
+  <main>
+    <header>
+      <p class="eyebrow">Cub Notes</p>
+      <h1>Notes, stored locally.</h1>
+      <p class="intro">The browser talks to the Bun server through tRPC; notes live in a local SQLite database.</p>
+    </header>
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+    <form id="new-note">
+      <label>
+        Title
+        <input name="title" maxlength="200" required autofocus>
+      </label>
+      <label>
+        Content
+        <textarea name="content" maxlength="20000" rows="5"></textarea>
+      </label>
+      <button type="submit">Save note</button>
+      <p id="form-status" role="status"></p>
+    </form>
 
-<div class="ticks"></div>
-<section id="spacer"></section>
+    <section aria-labelledby="notes-heading">
+      <div class="section-heading">
+        <h2 id="notes-heading">Your notes</h2>
+        <button id="refresh" class="quiet" type="button">Refresh</button>
+      </div>
+      <p id="notes-status" role="status">Loading notes…</p>
+      <ol id="notes"></ol>
+    </section>
+  </main>
 `;
 
-setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
+const form = document.querySelector<HTMLFormElement>("#new-note");
+const formStatus = document.querySelector<HTMLParagraphElement>("#form-status");
+const notesStatus = document.querySelector<HTMLParagraphElement>("#notes-status");
+const notesList = document.querySelector<HTMLOListElement>("#notes");
+const refreshButton = document.querySelector<HTMLButtonElement>("#refresh");
+
+if (
+  form === null ||
+  formStatus === null ||
+  notesStatus === null ||
+  notesList === null ||
+  refreshButton === null
+) {
+  throw new Error("Notes UI is incomplete");
+}
+
+const ui = { form, formStatus, notesStatus, notesList, refreshButton };
+
+function noteItem(note: Note) {
+  const item = document.createElement("li");
+  const title = document.createElement("h3");
+  const content = document.createElement("p");
+  const timestamp = document.createElement("time");
+
+  title.textContent = note.title;
+  content.textContent = note.content || "No content";
+  timestamp.dateTime = note.updatedAt;
+  timestamp.textContent = `Updated ${new Date(note.updatedAt).toLocaleString()}`;
+
+  item.append(title, content, timestamp);
+  return item;
+}
+
+async function refreshNotes() {
+  ui.notesStatus.textContent = "Loading notes…";
+
+  try {
+    const notes = await trpc.notes.list.query();
+    ui.notesList.replaceChildren(...notes.map(noteItem));
+    ui.notesStatus.textContent = notes.length === 0 ? "No notes yet." : "";
+  } catch (error) {
+    ui.notesStatus.textContent = "Could not load notes. Is the Bun server running?";
+    console.error(error);
+  }
+}
+
+function formText(data: FormData, name: string) {
+  const value = data.get(name);
+  return typeof value === "string" ? value : "";
+}
+
+ui.form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const data = new FormData(ui.form);
+  const submitButton = ui.form.querySelector<HTMLButtonElement>("button[type=submit]");
+  const title = formText(data, "title");
+  const content = formText(data, "content");
+
+  if (submitButton === null) {
+    return;
+  }
+
+  submitButton.disabled = true;
+  ui.formStatus.textContent = "Saving…";
+
+  try {
+    await trpc.notes.create.mutate({ title, content });
+    ui.form.reset();
+    ui.formStatus.textContent = "Saved.";
+    await refreshNotes();
+  } catch (error) {
+    ui.formStatus.textContent = "Could not save that note.";
+    console.error(error);
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+ui.refreshButton.addEventListener("click", refreshNotes);
+void refreshNotes();
