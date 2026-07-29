@@ -10,7 +10,7 @@
   "type": "module",
   "scripts": {
     "ready": "vp check && vp run -r typecheck && vp run -r test && vp run -r build",
-    "dev": "vp run --parallel --filter website --filter cub-server dev",
+    "dev": "vp run --parallel --filter cub-client --filter cub-server dev",
     "prepare": "vp config"
   },
   "devDependencies": {
