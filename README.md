@@ -1,29 +1,39 @@
-# Vite+ Monorepo Starter
+# Cub Notes
 
-A starter for creating a Vite+ monorepo.
+Cub Notes is a local-first notes app. The Vite web client calls a Bun server over
+tRPC, and the server stores notes in SQLite via `bun:sqlite`.
 
 ## Development
 
-- Check everything is ready:
+- Install dependencies:
+
+```bash
+bun install
+```
+
+- Start the web client and Bun server together:
+
+```bash
+vp run dev
+```
+
+The web client is available at `http://localhost:5173`; Vite proxies `/trpc` to
+the Bun server at `http://localhost:3000`.
+
+By default, the SQLite database is stored at
+`apps/cub-server/data/cub-notes.sqlite`. Set `DATABASE_PATH` to use another
+location, or set `PORT` to choose the Bun server port.
+
+## Validation
+
+Run all formatting, type checks, tests, and builds:
 
 ```bash
 vp run ready
 ```
 
-- Run the tests:
+Run an individual server command:
 
 ```bash
-vp run -r test
-```
-
-- Build the monorepo:
-
-```bash
-vp run -r build
-```
-
-- Run the development server:
-
-```bash
-vp run dev
+vp run cub-server#dev
 ```
