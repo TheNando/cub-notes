@@ -12,8 +12,8 @@
     "test": "vp test"
   },
   "dependencies": {
-    "@trpc/server": "^11.18.0",
-    "zod": "^4.3.6"
+    "@trpc/server": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

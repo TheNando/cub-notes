@@ -31,9 +31,14 @@
     "node": ">=22.18.0"
   },
   "catalog": {
+    "@chakra-ui/react": "^3.36.1",
+    "@emotion/react": "^11.14.0",
+    "@trpc/client": "^11.18.0",
+    "@trpc/server": "^11.18.0",
     "preact": "^10.29.7",
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
-    "vite-plus": "0.2.6"
+    "vite-plus": "0.2.6",
+    "zod": "^4.3.6"
   }
 }
