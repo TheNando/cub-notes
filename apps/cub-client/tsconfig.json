@@ -4,6 +4,8 @@
     "module": "esnext",
     "lib": ["ES2023", "DOM"],
     "types": ["vite/client"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
@@ -18,7 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "ui": ["../../packages/ui/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

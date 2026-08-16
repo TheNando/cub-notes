@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@cub/api": "workspace:*",
-    "@trpc/client": "^11.18.0"
+    "@trpc/client": "^11.18.0",
+    "preact": "catalog:",
+    "ui": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

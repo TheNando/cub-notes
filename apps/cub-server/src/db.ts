@@ -19,7 +19,7 @@ if (databasePath !== ":memory:") {
 
 const database = new Database(databasePath);
 
-database.exec(`
+database.run(`
   PRAGMA foreign_keys = ON;
   PRAGMA journal_mode = WAL;
   PRAGMA busy_timeout = 5000;
