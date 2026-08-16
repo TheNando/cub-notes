@@ -3,6 +3,7 @@ import type { Note } from "@cub/api";
 import { render } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { Button } from "ui";
+import { SideNav } from "./features/navigation/side-nav.tsx";
 import { trpc } from "./trpc.ts";
 
 function App() {
@@ -56,55 +57,59 @@ function App() {
   }
 
   return (
-    <main>
-      <header>
-        <p class="eyebrow">Cub Notes</p>
-        <h1>Notes, stored locally.</h1>
-        <p class="intro">
-          The browser talks to the Bun server through tRPC; notes live in a local SQLite database.
-        </p>
-      </header>
+    <div class="app-shell">
+      <SideNav />
 
-      <form onSubmit={saveNote}>
-        <label>
-          Title
-          <input name="title" maxlength={200} required autofocus />
-        </label>
-        <label>
-          Content
-          <textarea name="content" maxlength={20_000} rows={5} />
-        </label>
-        <Button type="submit" disabled={isSaving}>
-          Save note
-        </Button>
-        <p id="form-status" role="status">
-          {formStatus}
-        </p>
-      </form>
+      <main>
+        <header>
+          <p class="eyebrow">Cub Notes</p>
+          <h1>Notes, stored locally.</h1>
+          <p class="intro">
+            The browser talks to the Bun server through tRPC; notes live in a local SQLite database.
+          </p>
+        </header>
 
-      <section aria-labelledby="notes-heading">
-        <div class="section-heading">
-          <h2 id="notes-heading">Your notes</h2>
-          <Button class="quiet" type="button" onClick={refreshNotes}>
-            Refresh
+        <form onSubmit={saveNote}>
+          <label>
+            Title
+            <input name="title" maxlength={200} required autofocus />
+          </label>
+          <label>
+            Content
+            <textarea name="content" maxlength={20_000} rows={5} />
+          </label>
+          <Button type="submit" disabled={isSaving}>
+            Save note
           </Button>
-        </div>
-        <p id="notes-status" role="status">
-          {notesStatus}
-        </p>
-        <ol>
-          {notes.map((note) => (
-            <li key={note.id}>
-              <h3>{note.title}</h3>
-              <p>{note.content || "No content"}</p>
-              <time dateTime={note.updatedAt}>
-                Updated {new Date(note.updatedAt).toLocaleString()}
-              </time>
-            </li>
-          ))}
-        </ol>
-      </section>
-    </main>
+          <p id="form-status" role="status">
+            {formStatus}
+          </p>
+        </form>
+
+        <section aria-labelledby="notes-heading">
+          <div class="section-heading">
+            <h2 id="notes-heading">Your notes</h2>
+            <Button class="quiet" type="button" onClick={refreshNotes}>
+              Refresh
+            </Button>
+          </div>
+          <p id="notes-status" role="status">
+            {notesStatus}
+          </p>
+          <ol>
+            {notes.map((note) => (
+              <li key={note.id}>
+                <h3>{note.title}</h3>
+                <p>{note.content || "No content"}</p>
+                <time dateTime={note.updatedAt}>
+                  Updated {new Date(note.updatedAt).toLocaleString()}
+                </time>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </main>
+    </div>
   );
 }
 
