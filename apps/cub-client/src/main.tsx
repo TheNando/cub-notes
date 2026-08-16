@@ -1,121 +1,59 @@
 import "./style.css";
-import type { Note } from "@cub/api";
 import { render } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import { Button } from "ui";
 import { SideNav } from "./features/navigation/side-nav.tsx";
-import { trpc } from "./trpc.ts";
+import { fetchNotes } from "./features/notes/notes-data.ts";
+import { NotePage } from "./features/notes/note-page.tsx";
+import { NotesMenu } from "./features/notes/notes-menu.tsx";
+import type { NotePreview, NotesSource } from "./features/notes/types.ts";
+
+const inbox: NotesSource = { id: "inbox", name: "Inbox", type: "folder" };
+
+type NotesState = { status: "loading" } | { notes: NotePreview[]; status: "ready" };
 
 function App() {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [notesStatus, setNotesStatus] = useState("Loading notes…");
-  const [formStatus, setFormStatus] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-
-  async function refreshNotes() {
-    setNotesStatus("Loading notes…");
-
-    try {
-      const nextNotes = await trpc.notes.list.query();
-      setNotes(nextNotes);
-      setNotesStatus(nextNotes.length === 0 ? "No notes yet." : "");
-    } catch (error) {
-      setNotesStatus("Could not load notes. Is the Bun server running?");
-      console.error(error);
-    }
-  }
+  const [source, setSource] = useState<NotesSource>(inbox);
+  const [selectedNote, setSelectedNote] = useState<NotePreview | null>(null);
+  const [notesState, setNotesState] = useState<NotesState>({ status: "loading" });
 
   useEffect(() => {
-    void refreshNotes();
-  }, []);
+    let isCurrent = true;
+    setNotesState({ status: "loading" });
 
-  async function saveNote(event: SubmitEvent) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    if (!(form instanceof HTMLFormElement)) {
-      return;
-    }
+    void fetchNotes(source).then((nextNotes) => {
+      if (!isCurrent) {
+        return;
+      }
 
-    const data = new FormData(form);
-    const title = formText(data, "title");
-    const content = formText(data, "content");
+      setSelectedNote(nextNotes[0] ?? null);
+      setNotesState({ notes: nextNotes, status: "ready" });
+    });
 
-    setIsSaving(true);
-    setFormStatus("Saving…");
-
-    try {
-      await trpc.notes.create.mutate({ title, content });
-      form.reset();
-      setFormStatus("Saved.");
-      await refreshNotes();
-    } catch (error) {
-      setFormStatus("Could not save that note.");
-      console.error(error);
-    } finally {
-      setIsSaving(false);
-    }
-  }
+    return () => {
+      isCurrent = false;
+    };
+  }, [source]);
 
   return (
-    <div class="app-shell">
-      <SideNav />
+    <main class="app-shell">
+      <SideNav
+        selectedFolderId={source.type === "folder" ? source.id : undefined}
+        selectedTagId={source.type === "tag" ? source.id : undefined}
+        onFolderSelect={(folder) => setSource({ id: folder.id, name: folder.name, type: "folder" })}
+        onTagSelect={(tag) => setSource({ id: tag.id, name: tag.name, type: "tag" })}
+      />
 
-      <main>
-        <header>
-          <p class="eyebrow">Cub Notes</p>
-          <h1>Notes, stored locally.</h1>
-          <p class="intro">
-            The browser talks to the Bun server through tRPC; notes live in a local SQLite database.
-          </p>
-        </header>
+      <NotesMenu
+        notes={notesState.status === "ready" ? notesState.notes : []}
+        selectedNoteId={selectedNote?.id}
+        sourceName={source.name}
+        status={notesState.status}
+        onNoteSelect={setSelectedNote}
+      />
 
-        <form onSubmit={saveNote}>
-          <label>
-            Title
-            <input name="title" maxlength={200} required autofocus />
-          </label>
-          <label>
-            Content
-            <textarea name="content" maxlength={20_000} rows={5} />
-          </label>
-          <Button type="submit" disabled={isSaving}>
-            Save note
-          </Button>
-          <p id="form-status" role="status">
-            {formStatus}
-          </p>
-        </form>
-
-        <section aria-labelledby="notes-heading">
-          <div class="section-heading">
-            <h2 id="notes-heading">Your notes</h2>
-            <Button class="quiet" type="button" onClick={refreshNotes}>
-              Refresh
-            </Button>
-          </div>
-          <p id="notes-status" role="status">
-            {notesStatus}
-          </p>
-          <ol>
-            {notes.map((note) => (
-              <li key={note.id}>
-                <h3>{note.title}</h3>
-                <p>{note.content || "No content"}</p>
-                <time dateTime={note.updatedAt}>
-                  Updated {new Date(note.updatedAt).toLocaleString()}
-                </time>
-              </li>
-            ))}
-          </ol>
-        </section>
-      </main>
-    </div>
+      <NotePage note={selectedNote} source={source} />
+    </main>
   );
-}
-
-function formText(data: FormData, name: string) {
-  const value = data.get(name);
-  return typeof value === "string" ? value : "";
 }
 
 const app = document.querySelector<HTMLDivElement>("#app");

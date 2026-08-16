@@ -1,24 +1,29 @@
 import { ChevronDown, ChevronRight, Folder, FolderOpen, Hash } from "lucide-preact";
-import type { JSX } from "preact";
 import { useState } from "preact/hooks";
+import { cx } from "../../lib/class-names.ts";
+import type { WithClass } from "../../lib/class-names.ts";
 import { getTagData, getVaultData } from "./navigation-data.ts";
 import "./side-nav.css";
 import type { TagData, VaultData, VaultFolder } from "./types.ts";
 
-interface SideNavProps extends JSX.HTMLAttributes<HTMLElement> {
+interface SideNavProps extends WithClass<HTMLElement> {
   onFolderSelect?: (folder: VaultFolder) => void;
   onTagSelect?: (tag: TagData) => void;
+  selectedFolderId?: string;
+  selectedTagId?: string;
   tags?: TagData[];
   vault?: VaultData;
 }
 
 interface SideNavVaultProps {
   onFolderSelect?: (folder: VaultFolder) => void;
+  selectedFolderId?: string;
   vault: VaultData;
 }
 
 interface SideNavTagsProps {
   onTagSelect?: (tag: TagData) => void;
+  selectedTagId?: string;
   tags: TagData[];
 }
 
@@ -27,20 +32,24 @@ export function SideNav({
   tags = getTagData(),
   onFolderSelect,
   onTagSelect,
+  selectedFolderId,
+  selectedTagId,
   class: className,
   ...props
 }: SideNavProps) {
-  const classes = typeof className === "string" ? `cub-side-nav ${className}` : "cub-side-nav";
-
   return (
-    <aside aria-label="Vault navigation" class={classes} {...props}>
-      <SideNavVault vault={vault} onFolderSelect={onFolderSelect} />
-      <SideNavTags tags={tags} onTagSelect={onTagSelect} />
+    <aside aria-label="Vault navigation" class={cx("cub-side-nav", className)} {...props}>
+      <SideNavVault
+        vault={vault}
+        onFolderSelect={onFolderSelect}
+        selectedFolderId={selectedFolderId}
+      />
+      <SideNavTags tags={tags} onTagSelect={onTagSelect} selectedTagId={selectedTagId} />
     </aside>
   );
 }
 
-function SideNavVault({ vault, onFolderSelect }: SideNavVaultProps) {
+function SideNavVault({ vault, onFolderSelect, selectedFolderId }: SideNavVaultProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -65,7 +74,12 @@ function SideNavVault({ vault, onFolderSelect }: SideNavVaultProps) {
       {isExpanded ? (
         <ul class="cub-side-nav__tree">
           {vault.folders.map((folder) => (
-            <VaultFolderItem key={folder.id} folder={folder} onFolderSelect={onFolderSelect} />
+            <VaultFolderItem
+              key={folder.id}
+              folder={folder}
+              onFolderSelect={onFolderSelect}
+              selectedFolderId={selectedFolderId}
+            />
           ))}
         </ul>
       ) : null}
@@ -73,7 +87,7 @@ function SideNavVault({ vault, onFolderSelect }: SideNavVaultProps) {
   );
 }
 
-function SideNavTags({ tags, onTagSelect }: SideNavTagsProps) {
+function SideNavTags({ tags, onTagSelect, selectedTagId }: SideNavTagsProps) {
   return (
     <section class="cub-side-nav__section" aria-labelledby="tags-heading">
       <h2 id="tags-heading" class="cub-side-nav__section-heading">
@@ -82,7 +96,12 @@ function SideNavTags({ tags, onTagSelect }: SideNavTagsProps) {
       <ul class="cub-side-nav__tags">
         {tags.map((tag) => (
           <li key={tag.id}>
-            <button type="button" class="cub-side-nav__tag" onClick={() => onTagSelect?.(tag)}>
+            <button
+              type="button"
+              class="cub-side-nav__tag"
+              aria-current={selectedTagId === tag.id ? "page" : undefined}
+              onClick={() => onTagSelect?.(tag)}
+            >
               <Hash class="cub-side-nav__tag-icon" size={17} aria-hidden="true" />
               <span class="cub-side-nav__tag-label">{tag.name}</span>
               <span class="cub-side-nav__tag-count">{tag.noteCount}</span>
@@ -97,14 +116,15 @@ function SideNavTags({ tags, onTagSelect }: SideNavTagsProps) {
 interface VaultFolderItemProps {
   folder: VaultFolder;
   onFolderSelect?: (folder: VaultFolder) => void;
+  selectedFolderId?: string;
 }
 
-function VaultFolderItem({ folder, onFolderSelect }: VaultFolderItemProps) {
+function VaultFolderItem({ folder, onFolderSelect, selectedFolderId }: VaultFolderItemProps) {
   const hasChildren = Boolean(folder.children?.length);
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <li class={hasChildren ? "cub-side-nav__branch" : undefined}>
+    <li class="cub-side-nav__row">
       {hasChildren ? (
         <button
           type="button"
@@ -120,7 +140,12 @@ function VaultFolderItem({ folder, onFolderSelect }: VaultFolderItemProps) {
           )}
         </button>
       ) : null}
-      <button type="button" class="cub-side-nav__item" onClick={() => onFolderSelect?.(folder)}>
+      <button
+        type="button"
+        class="cub-side-nav__item"
+        aria-current={selectedFolderId === folder.id ? "page" : undefined}
+        onClick={() => onFolderSelect?.(folder)}
+      >
         {hasChildren && isExpanded ? (
           <FolderOpen class="cub-side-nav__item-icon" size={18} aria-hidden="true" />
         ) : (
@@ -131,7 +156,12 @@ function VaultFolderItem({ folder, onFolderSelect }: VaultFolderItemProps) {
       {hasChildren && isExpanded ? (
         <ul class="cub-side-nav__tree">
           {folder.children?.map((child) => (
-            <VaultFolderItem key={child.id} folder={child} onFolderSelect={onFolderSelect} />
+            <VaultFolderItem
+              key={child.id}
+              folder={child}
+              onFolderSelect={onFolderSelect}
+              selectedFolderId={selectedFolderId}
+            />
           ))}
         </ul>
       ) : null}

@@ -1,0 +1,55 @@
+.note-page {
+  display: grid;
+  min-height: 0;
+  align-content: start;
+  overflow-y: auto;
+  padding: clamp(2rem, 7vw, 6rem);
+  background: var(--cub-surface);
+}
+
+.note-page--empty {
+  align-content: center;
+}
+
+.note-page__content,
+.note-page__empty {
+  width: min(42rem, 100%);
+  margin: 0 auto;
+  overflow-wrap: break-word;
+}
+
+.note-page__eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--cub-ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.note-page h1 {
+  margin: 0 0 1.5rem;
+  color: var(--cub-ink-strong);
+  font-family: var(--cub-font-serif);
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+
+.note-page__content > p:last-child,
+.note-page__empty p {
+  max-width: 38rem;
+  color: var(--cub-ink-soft);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 48rem) {
+  .note-page {
+    min-height: 24rem;
+    border: 1px solid var(--cub-line);
+    border-radius: var(--cub-radius-lg);
+    padding: 2rem 1.25rem;
+  }
+}
