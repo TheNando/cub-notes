@@ -15,6 +15,7 @@
       "dependencies": {
         "@cub/api": "workspace:*",
         "@trpc/client": "catalog:",
+        "lucide-preact": "catalog:",
         "preact": "catalog:",
         "ui": "workspace:*",
       },
@@ -53,11 +54,13 @@
       "devDependencies": {
         "@types/node": "^26.1.1",
         "bumpp": "^11.1.0",
+        "lucide-preact": "catalog:",
         "preact": "catalog:",
         "typescript": "catalog:",
         "vite-plus": "catalog:",
       },
       "peerDependencies": {
+        "lucide-preact": "catalog:",
         "preact": "catalog:",
       },
     },
@@ -80,6 +83,7 @@
     "@emotion/react": "^11.14.0",
     "@trpc/client": "^11.18.0",
     "@trpc/server": "^11.18.0",
+    "lucide-preact": "^1.31.0",
     "preact": "^10.29.7",
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
@@ -412,6 +416,8 @@
     "lightningcss-win32-arm64-msvc": ["lightningcss-win32-arm64-msvc@1.33.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA=="],
 
     "lightningcss-win32-x64-msvc": ["lightningcss-win32-x64-msvc@1.33.0", "", { "os": "win32", "cpu": "x64" }, "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA=="],
+
+    "lucide-preact": ["lucide-preact@1.31.0", "", { "peerDependencies": { "preact": "^10.27.2" } }, "sha512-Of9TS1ZFAnWpDZZ/iQl4ydyNHU8peDEtqgQFDOhVAU3SdYosUvP/BJeP0lFLZ4QWx5dxABhToeD03Btoa7G/ug=="],
 
     "lz-string": ["lz-string@1.5.0", "", { "bin": { "lz-string": "bin/bin.js" } }, "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ=="],
 

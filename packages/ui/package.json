@@ -33,11 +33,13 @@
   "devDependencies": {
     "@types/node": "^26.1.1",
     "bumpp": "^11.1.0",
+    "lucide-preact": "catalog:",
     "preact": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
+    "lucide-preact": "catalog:",
     "preact": "catalog:"
   }
 }
