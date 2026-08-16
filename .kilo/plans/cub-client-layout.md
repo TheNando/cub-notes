@@ -210,10 +210,10 @@ to the left of `Projects` / `Areas` at the same tree depth. Labels in one tree l
 ### 4.6 New `src/lib/class-names.ts`
 
 ```ts
-import type { JSX } from "preact";
+import type * as Preact from "preact";
 
 /** Element props whose `class` is a plain string, so merging stays a one-liner. */
-export type WithClass<E extends EventTarget> = Omit<JSX.HTMLAttributes<E>, "class"> & {
+export type WithClass<E extends EventTarget> = Omit<Preact.HTMLAttributes<E>, "class"> & {
   class?: string;
 };
 

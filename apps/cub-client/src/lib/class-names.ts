@@ -1,7 +1,7 @@
-import type { JSX } from "preact";
+import type * as Preact from "preact";
 
 /** Element props whose `class` is a plain string, so merging stays a one-liner. */
-export type WithClass<E extends EventTarget> = Omit<JSX.HTMLAttributes<E>, "class"> & {
+export type WithClass<E extends EventTarget> = Omit<Preact.HTMLAttributes<E>, "class"> & {
   class?: string;
 };
 
